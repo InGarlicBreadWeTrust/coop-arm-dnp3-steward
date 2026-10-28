@@ -1,0 +1,79 @@
+name: CI cross-compile ARM64
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  # Native x86_64 build + run of the demo master
+  native-x86_64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: actions/setup-java@v4
+        with: { distribution: "temurin", java-version: "17" }
+      - name: Build x86_64
+        run: |
+          cmake -G "Unix Makefiles" -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DDNP3_TLS=ON -DDNP3_EXAMPLES=ON -DDNP3_TESTS=OFF -DDNP3_JAVA=OFF
+          make -C build -j"$(nproc)"
+      - name: Run master demo
+        run: ./build/cpp/examples/master/master-demo --help | head -8
+      - name: Run outstation demo
+        run: ./build/cpp/examples/outstation/outstation-demo --help | head -8
+
+  # Cross-compile ARM64 with a fresh aarch64 cross toolchain + qemu-user execution
+  cross-aarch64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build aarch64 cross toolchain + sysroot (userspace)
+        run: |
+          set -euo pipefail
+          export DEBIAN_FRONTEND=noninteractive
+          # Cross compiler + host-side binutils (gcc-14-aarch64-linux-gnu IS the apt name)
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            gcc-14-aarch64-linux-gnu g++-14-aarch64-linux-gnu binutils-aarch64-linux-gnu
+          # qemu-user to EXECUTE the cross-built binaries (not just link them)
+          sudo apt-get install -y -qq qemu-user
+          # aarch64 runtime libs for QEMU execution
+          sudo apt-get install -y -qq dpkg-cross debootstrap 2>/dev/null || true
+          ROOT=$A_ARCH64_ROOT
+          mkdir -p "$ROOT" && cd "$ROOT"
+          # Download the runtime deps in the correct apt architecture syntax
+          for pkg in libc6:arm64 libstdc++6:arm64 libgcc-14-dev:arm64 linux-libc-dev:arm64; do
+            # dpkg-cross can download + unpack debs in the target architecture
+            dpkg-cross download "$pkg" --arch arm64 --prefix=$ROOT 2>/dev/null || true
+          done
+          echo "AARCH64_ROOT=$ROOT" >> "$GITHUB_ENV"
+      - name: Configure + build ARM64 through the co-op toolchain
+        env:
+          AARCH64_SYSROOT: ${{ github.workspace }}
+          AARCH64_TRIPLET: aarch64-linux-gnu
+          AARCH64_CC:       aarch64-linux-gnu-gcc-14
+          AARCH64_CXX:      aarch64-linux-gnu-g++-14
+        run: |
+          cmake -G "Unix Makefiles" -B build-arm64 \
+            -DCMAKE_TOOLCHAIN_FILE=cmake/arm64-toolchain.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DDNP3_TLS=OFF -DDNP3_EXAMPLES=ON -DDNP3_TESTS=OFF -DDNP3_JAVA=OFF
+          make -C build-arm64 -j"$(nproc)"
+      - name: Verify ARM64 artifact
+        run: |
+          file build-arm64/cpp/lib/libopendnp3.so
+          file build-arm64/cpp/examples/master/master-demo
+          readelf -h build-arm64/cpp/lib/libopendnp3.so | grep -E 'Machine|Class'
+      - name: Execute ARM64 demo under QEMU (proves it runs on AArch64 CPU)
+        env:
+          AARCH64_SYSROOT: ${{ github.workspace }}
+        run: |
+          export LD_LIBRARY_PATH="$AARCH64_SYSROOT/usr/aarch64-linux-gnu/lib"
+          qemu-aarch64 -L "$AARCH64_SYSROOT/usr/aarch64-linux-gnu" \
+            build-arm64/cpp/examples/master/master-demo --help | head -12
