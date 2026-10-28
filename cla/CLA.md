@@ -1,6 +1,6 @@
-# Developer Certificate of Origin
+# Developer Certificate of Origin (DCO 1.1)
 
-Individual Contributor License Agreement (CLA) for openDNP3 co-op stewardship fork.
+Contribution process for the openDNP3 co-op stewardship fork.
 
 By making a contribution to this project, I certify that:
 
@@ -19,5 +19,6 @@ Certify by adding `Signed-off-by: Name <email>` to each commit:
 git commit -s -m "Describe your change"
 ```
 
-This certificate is the Apache Foundation's standard DCO, used by many Apache
-projects. An organisation-level CLA is not required.
+This certificate is the **Developer Certificate of Origin (DCO 1.1)**, the
+commit `Signed-off-by` mechanism that originated in the Linux kernel (now
+hosted at `signoff.dev`). An organisation-level CLA is not required.

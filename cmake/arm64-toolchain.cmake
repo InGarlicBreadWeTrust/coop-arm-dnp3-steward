@@ -10,10 +10,13 @@
 # with the sysroot laid out by 'apt-get download --architecture arm64'
 # (see .github/workflows/ci-cross-arm64.yml).
 #
-# NOTE: do NOT add CMAKE_FIND_ROOT_PATH_MODE_* here - it breaks opendnp3's own
-# find_package() calls (ClangFormat, etc.). The structure below is the proven one
-# (builds exit 0 and runs under QEMU): --sysroot is baked into every *_LINK_FLAGS
-# var as a single string, and the gcc-14 cross dir is gcc-cross/<triplet>/14.
+# NOTE: MODE_PROGRAM and MODE_PACKAGE are forced to NEVER, while MODE_LIBRARY /
+# MODE_INCLUDE are left at CMake's cross default "ONLY". This is the proven
+# structure (builds exit 0, runs under QEMU): forking host-side find_program /
+# find_package (ClangFormat, java, python optionals co-ops may enable) resolves
+# on the build host, not inside the aarch64 sysroot, while the cross compile/link
+# stays correct because --sysroot is baked into every *_LINK_FLAGS var as a
+# single string and the gcc-14 cross dir is gcc-cross/<triplet>/14.
 
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR aarch64)
@@ -43,11 +46,16 @@ if(NOT AARCH64_CXX)
   set(AARCH64_CXX ${AARCH64_TRIPLET}-g++-14)
 endif()
 
-set(CMAKE_C_COMPILER        ${AARCH64_CC})
-set(CMAKE_CXX_COMPILER      ${AARCH64_CXX})
-set(CMAKE_C_COMPILER_TARGET    ${AARCH64_TRIPLET})
-set(CMAKE_CXX_COMPILER_TARGET  ${AARCH64_TRIPLET})
+set(CMAKE_C_COMPILER         ${AARCH64_CC})
+set(CMAKE_CXX_COMPILER       ${AARCH64_CXX})
+# Target selection is done by the cross-named compiler above; CMAKE_C/CXX_
+# COMPILER_TARGET are non-standard CMake no-ops and are intentionally absent.
 set(CMAKE_FIND_ROOT_PATH ${AARCH64_SYSROOT})
+
+# HOST-side program/package discovery on the build host; cross library/include
+# discovery stays on the aarch64 sysroot ("ONLY").
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)
 
 set(CMAKE_INSTALL_PREFIX /usr/local)
 

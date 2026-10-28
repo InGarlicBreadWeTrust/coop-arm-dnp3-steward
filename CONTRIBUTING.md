@@ -8,7 +8,12 @@ tracks the archived v3.1.2 reference and adds an ARM64 cross-build.
 ## How to contribute
 
 1. Fork the repo.
-2. `git pull` from upstream `main` to keep up with opendnp3 security fixes.
+2. **Do NOT pull from upstream `main`.** Upstream `dnp3/opendnp3` is
+   **archived (no commits since 2022)**, so a rolling `git pull` neither brings
+   security fixes nor succeeds. Instead pin the frozen **v3.1.2 commit hash**
+   (recorded in `docs/CHANGELOG.md`) and incorporate any later fix by an
+   **explicit, signed-off cherry-pick with security review** -- never by an
+   open-ended sync.
 3. Make changes on a feature branch.
 4. Add a unit test if the change touches protocol / channel behaviour.
 5. Sign the Developer Certificate of Origin (`cla/CLA.md`).
@@ -18,7 +23,7 @@ We accept:
 - ARM64 / RPi / Orange Pi device packaging
 - CI hardening for aarch64 cross-compile
 - DNP3 conformance test additions
-- co-op runbooks, docs, and runbooks
+- co-op runbooks and docs
 - bug fixes with test regression additions
 
 We do NOT accept:
@@ -35,5 +40,5 @@ For example:
 ```
 arm64: add cross-build toolchain for co-op SCADA gateways
 
-Signed-off-by: Jane <jane@@example.coop>
+Signed-off-by: Jane <jane@example.coop>
 ```

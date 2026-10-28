@@ -3,8 +3,9 @@
 This repository provides a co-op / rural-utility focused build and packaging layer
 on the **opendnp3** software. It is designed so that a cooperative or small
 utility can build and run a DNP3 (IEEE-1815) master / outstation on ARM64
-hardware common to co-op SCADA edges **without legal risk** ("the goal is to
-help, not get sued").
+hardware common to co-op SCADA edges, while minimising legal exposure ("the goal
+is to help, not get sued"). It is a *packaging and cross-build layer*, not a
+legal opinion; see the FTO recommendation below.
 
 ## License
 
@@ -21,13 +22,17 @@ All new co-op-authored files (this `docs/` tree, `cmake/arm64-toolchain.cmake`,
 
 ## DNP3 / IEEE-1815 freedom to operate
 
-DNP3 is a **public standard** maintained by a 501(c)(6) trade association
-(OpenDNP3 Association / IEEE-1815). It is not patented or litigated against
-implementers in a way we found evidence of; the IEEE standard itself, and the
-Apache-2.0 patent grant within opendnp3, covers a stewardship fork. **However, a
-one-time freedom-to-operate (FTO) legal opinion (~\$1,500 US for a utility-scale
-review) is recommended** before commercial distribution to a co-op that will
-operate a master station. Apache-2.0's patent grant is strong but is not a
+Apache-2.0's patent grant covers the **opendnp3 code only** -- it does not
+confer freedom to operate on the DNP3 / IEEE-1815 *standard* itself. IEEE 1815
+is an IEEE (501(c)(3)) standard governed by IEEE's RA/patent disclosure policy,
+not a 501(c)(6) trade association, and a "public protocol / no litigation found"
+statement is *not* a freedom-to-operate finding. DNP3 is a de facto public
+standard, so the practical FTO picture looks reasonable, but it has **not**
+been established by any opinion or registry.
+
+**Recommended gating:** commercial master-station operation by a co-op should be
+preceded by a one-time freedom-to-operate (FTO) legal opinion (~\$1,500 US for
+a utility-scale review). Apache-2.0's patent grant is strong but is **not** a
 substitute for a paid FTO opinion.
 
 ## Privacy & telemetry
