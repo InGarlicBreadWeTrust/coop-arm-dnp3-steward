@@ -27,4 +27,14 @@ See `README.md` "Design principles" and `SECURITY_DESIGN.md` where present. The
 fork adds no new network surface; it only cross-compiles and packages the same
 protocol code. The appliance runs passive (mirrored) traffic only.
 
-<!-- TODO(maintainer): fill in a real disclosure channel / PGP key here. -->
+## Contact
+
+- Open a new issue in this repo and label it `security` — GitHub notifies the
+  maintainer (`@InGarlicBreadWeTrust`) immediately.
+- Or contact the owner directly via the GitHub Contact-owner interface at
+  `https://github.com/InGarlicBreadWeTrust` (also in the "About" sidebar).
+- Prefer a **draft issue** so you can iterate with the maintainer before it is
+  visible.
+- PGP key: not published yet. Send reports in clear text via a draft issue;
+  for encrypted contact, request the key in your first message and we will
+  respond out-of-band.
